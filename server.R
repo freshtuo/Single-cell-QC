@@ -81,6 +81,42 @@ shinyServer(function(input, output) {
     g
   })
 
+  drawFracPlot <- reactive({
+    # calculate accumulative UMI counts fraction
+    fracCountsPlot <- getAccumulativeUMIFrac()
+    if (is.null(fracCountsPlot))
+      return(NULL)
+    # max number of cells to plot
+    maxCells <- 3*input$estCells
+    # draw plot
+    g <- ggplot(fracCountsPlot, aes(x=sn,y=fracCounts))
+    g <- g + geom_line(size=1)
+    g <- g + geom_vline(xintercept=input$numCells,colour="#990000", linetype="dashed")
+    g <- g + coord_cartesian(xlim=c(0,maxCells), ylim=c(0,1))
+    g <- g + theme_bw() + theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank(), panel.background=element_rect(fill="gray98"))
+    g <- g + xlab("Cells sorted by UMI counts [descending]") + ylab("Accumulative fraction of UMI counts")
+    g <- g + theme(axis.text=element_text(size=16,face="bold"), axis.title=element_text(size=18,face="bold"), title=element_text(size=16,face="bold"))
+    # return
+    g
+  })
+
+  # download the fraction plot
+  output$downloadFrac <- downloadHandler(
+    filename=function(){
+      sampleId <- tools::file_path_sans_ext(basename(input$inputFile$datapath))
+      return(paste(sampleId,"fraction","accumulative","UMI","counts","png",sep="."))
+      #paste(tools::file_path_sans_ext(basename(input$inputFile$datapath)), "fraction", "png", sep=".")
+    },
+    content=function(file){
+      g <- drawFracPlot()
+      if (is.null(g))
+        return(NULL)
+      ggsave(filename=file, plot=g, width=6, height=6, units="in", dpi=300)
+    }
+  )
+
+  #outputOptions(output, "downloadFrac", suspendWhenHidden=FALSE)
+  
   # format raw UMI counts for plotting
   formatUMICounts <- reactive({
     # load UMI counts
@@ -97,6 +133,7 @@ shinyServer(function(input, output) {
     # return
     return(countsPlot)
   })
+
   # draw raw UMI counts plot
   output$rawPlot <- renderPlot({
     # format raw UMI counts

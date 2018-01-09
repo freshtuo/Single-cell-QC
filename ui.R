@@ -32,7 +32,10 @@ shinyUI(fluidPage(
     
     # Show a plot of the generated distribution
     mainPanel(
+      # fraction of accumulative UMI counts plot
       plotOutput("fracPlot"),
+      # download the "fraction" plot
+      downloadButton(outputId="downloadFrac", label="Download"),
       plotOutput("rawPlot")
     )
   )
