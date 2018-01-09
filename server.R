@@ -76,7 +76,7 @@ shinyServer(function(input, output) {
     g <- g + geom_vline(xintercept=input$numCells,colour="#990000", linetype="dashed")
     g <- g + coord_cartesian(xlim=c(0,maxCells), ylim=c(0,1))
     g <- g + theme_bw() + theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank(), panel.background=element_rect(fill="gray98"))
-    g <- g + xlab("Cells sorted by UMI counts [descending]") + ylab("Accumulative fraction of UMI counts")
+    g <- g + xlab("Cells sorted by UMI counts [descending]") + ylab("Cumulative fraction of UMI counts")
     g <- g + theme(axis.text=element_text(size=16,face="bold"), axis.title=element_text(size=18,face="bold"), title=element_text(size=16,face="bold"))
     # return
     g
