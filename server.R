@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+library(shinyjs)
 library(ggplot2)
 library(scales)
 
@@ -86,6 +87,11 @@ shinyServer(function(input, output) {
     drawFracPlot()
   })
 
+  # disable download buttion if the input UMI counts file is not ready
+  observe({
+    toggleState("downloadFracPlot", !is.null(input$inputFile))
+  })
+
   # download fraction of accumulative UMI counts plot
   output$downloadFracPlot <- downloadHandler(
     filename=function(){
@@ -144,6 +150,11 @@ shinyServer(function(input, output) {
   # render raw UMI counts plot
   output$rawPlot <- renderPlot({
     drawRawPlot()
+  })
+
+  # disable download buttion if the input UMI counts file is not ready
+  observe({
+    toggleState("downloadRawPlot", !is.null(input$inputFile))
   })
 
   # download raw UMI counts plot
