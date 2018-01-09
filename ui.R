@@ -34,9 +34,15 @@ shinyUI(fluidPage(
     mainPanel(
       # fraction of accumulative UMI counts plot
       plotOutput("fracPlot"),
-      # download the "fraction" plot
-      downloadButton(outputId="downloadFrac", label="Download"),
-      plotOutput("rawPlot")
+      hr(),
+      # download the "fraction counts" plot
+      downloadButton(outputId="downloadFracPlot", label="Download your plot"),
+      hr(),
+      # raw UMI counts plot
+      plotOutput("rawPlot"),
+      hr(),
+      # download the "raw counts" plot
+      downloadButton(outputId="downloadRawPlot", label="Download your plot")
     )
   )
 ))
