@@ -26,7 +26,7 @@ shinyUI(fluidPage(
                 multiple=F),
       numericInput(inputId="estCells",
                    label="Estimated cell number:",
-                   value=1,
+                   value=1200,
                    min=1),
       conditionalPanel(condition="output.cellSlider",uiOutput("cellSlider"))
       #uiOutput("cellSlider")
