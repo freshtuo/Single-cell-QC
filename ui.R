@@ -32,7 +32,8 @@ shinyUI(fluidPage(
     
     # Show a plot of the generated distribution
     mainPanel(
-      plotOutput("fracPlot")
+      plotOutput("fracPlot"),
+      plotOutput("rawPlot")
     )
   )
 ))

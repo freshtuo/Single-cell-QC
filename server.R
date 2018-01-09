@@ -9,6 +9,7 @@
 
 library(shiny)
 library(ggplot2)
+library(scales)
 
 options(shiny.maxRequestSize=30*1024^2) 
 
@@ -70,13 +71,50 @@ shinyServer(function(input, output) {
     maxCells <- 3*input$estCells
     # draw plot
     g <- ggplot(fracCountsPlot, aes(x=sn,y=fracCounts))
-    g <- g + geom_line()
+    g <- g + geom_line(size=1)
     g <- g + geom_vline(xintercept=input$numCells,colour="#990000", linetype="dashed")
     g <- g + coord_cartesian(xlim=c(0,maxCells), ylim=c(0,1))
     g <- g + theme_bw() + theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank(), panel.background=element_rect(fill="gray98"))
-    g <- g + xlab("Cell sorted by UMI counts [descending]") + ylab("Accumulative fraction of UMI counts")
+    g <- g + xlab("Cells sorted by UMI counts [descending]") + ylab("Accumulative fraction of UMI counts")
+    g <- g + theme(axis.text=element_text(size=16,face="bold"), axis.title=element_text(size=18,face="bold"), title=element_text(size=16,face="bold"))
     # return
     g
   })
-  
+
+  # format raw UMI counts for plotting
+  formatUMICounts <- reactive({
+    # load UMI counts
+    counts <- getUMICounts()
+    if (is.null(counts))
+      return(NULL)
+    # max number of cells to plot
+    maxCells <- 3*input$estCells
+    # prepare data.frame for plotting
+    sn <- c(1:nrow(counts))
+    countsPlot <- data.frame(sn, counts$GeneUmiCount, counts$CellId)
+    colnames(countsPlot) <- c("sn", "UMICounts", "CellId")
+    countsPlot <- countsPlot[1:maxCells,]
+    # return
+    return(countsPlot)
+  })
+  # draw raw UMI counts plot
+  output$rawPlot <- renderPlot({
+    # format raw UMI counts
+    countsPlot <- formatUMICounts()
+    if (is.null(countsPlot))
+      return(NULL)
+    # max number of cells to plot
+    maxCells <- 3*input$estCells
+    # draw plot
+    g <- ggplot(countsPlot, aes(x=sn, y=UMICounts))
+    g <- g + geom_point(shape=21, size=4, alpha=0.6, colour="blue", fill=NA)
+    g <- g + geom_line(colour="green") + scale_y_log10(labels=comma)
+    g <- g + geom_vline(xintercept=input$numCells, colour="#990000", linetype="dashed")
+    g <- g + coord_cartesian(xlim=c(0,maxCells))
+    g <- g + theme_bw() + theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank(), panel.background=element_rect(fill="gray98"))
+    g <- g + xlab("Cells sorted by UMI counts [descending]") + ylab("UMI counts")
+    g <- g + theme(axis.text=element_text(size=16,face="bold"), axis.title=element_text(size=18,face="bold"), title=element_text(size=16,face="bold"))
+    # return
+    g
+  })
 })
