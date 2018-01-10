@@ -25,22 +25,28 @@ capEffCut <- 0.05
 # maxCells = maxRatioCut * estCells
 maxRatioCut <- 3
 
+# initiate 'estCells'
+initEstCells <- 1200
+
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
   # update EstCells (avoid NULL value)
   getEstCells <- reactive({
-    if (is.null(input$estCells))
-      return(1200)# by default, assume 1200 cells
-    else
-      return(input$estCells*maxRatioCut)# allow 3 times more cells than estimated
+    if (is.na(input$estCells)){
+      return(initEstCells)# use default value if estCells is not available
+    }
+    else{
+      initEstCells <- input$estCells# update 'initEstCells', for some reason not really working...
+      return(input$estCells)# load estCells if available
+    }
   })
 
   # update MaxCells (avoid NULL value)
   getMaxCells <- reactive({
-    if (is.null(input$estCells))
-      return(1200*maxRatioCut)# by default, assume 1200 cells
+    if (is.na(input$estCells))
+      return(initEstCells*maxRatioCut)# use default value if estCells is not available
     else
-      return(input$estCells)
+      return(input$estCells*maxRatioCut)# allow 3 times more cells than estimated
   })
 
   # update cell number slider based on user input
@@ -67,11 +73,13 @@ shinyServer(function(input, output) {
     counts <- getUMICounts()
     if (is.null(counts))
       return(NULL)
+    # estimated number of cells to plot
+    estCells <- getEstCells()
     # number of estimated beads (20 X estimated cells)
     # this number is for ddSeq/Drop-seq only
-    numBeads <- input$estCells/capEffCut
+    numBeads <- estCells/capEffCut
     # max number of cells to plot
-    maxCells <- maxRatioCut*input$estCells
+    maxCells <- getMaxCells()
     # remove noise counts
     counts <- counts[1:numBeads,]
     # calculate accumulative counts
@@ -94,7 +102,7 @@ shinyServer(function(input, output) {
     if (is.null(fracCountsPlot))
       return(NULL)
     # max number of cells to plot
-    maxCells <- maxRatioCut*input$estCells
+    maxCells <- getMaxCells()
     # draw plot
     g <- ggplot(fracCountsPlot, aes(x=sn,y=fracCounts))
     g <- g + geom_line(size=1)
@@ -141,7 +149,7 @@ shinyServer(function(input, output) {
     if (is.null(counts))
       return(NULL)
     # max number of cells to plot
-    maxCells <- maxRatioCut*input$estCells
+    maxCells <- getMaxCells()
     # prepare data.frame for plotting
     sn <- c(1:nrow(counts))
     countsPlot <- data.frame(sn, counts$GeneUmiCount, counts$CellId)
@@ -158,7 +166,7 @@ shinyServer(function(input, output) {
     if (is.null(countsPlot))
       return(NULL)
     # max number of cells to plot
-    maxCells <- maxRatioCut*input$estCells
+    maxCells <- getMaxCells()
     # draw plot
     g <- ggplot(countsPlot, aes(x=sn, y=UMICounts))
     #g <- g + geom_point(shape=21, size=4, alpha=0.6, colour="blue", fill=NA)

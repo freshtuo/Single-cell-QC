@@ -10,6 +10,9 @@
 library(shiny)
 library(shinyjs)
 
+# default 'estCells'
+initEstCells <- 1200
+
 # Define UI for application that draws a histogram
 shinyUI(fluidPage(
   useShinyjs(),# include shinyjs
@@ -26,7 +29,7 @@ shinyUI(fluidPage(
                 multiple=F),
       numericInput(inputId="estCells",
                    label="Estimated cell number:",
-                   value=1200,
+                   value=initEstCells,
                    min=1),
       conditionalPanel(condition="output.cellSlider",uiOutput("cellSlider"))
       #uiOutput("cellSlider")
