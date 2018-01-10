@@ -157,7 +157,7 @@ shinyServer(function(input, output) {
     if (is.null(counts))
       return(NULL)
     # max number of cells to plot
-    maxCells <- getMaxCells()
+    maxCells <- getMaxCells() * maxRatioCut# double the ratio to include more cells
     # prepare data.frame for plotting
     sn <- c(1:nrow(counts))
     countsPlot <- data.frame(sn, counts$DetectedGenes, counts$GeneUmiCount, counts$CellId)
@@ -174,7 +174,7 @@ shinyServer(function(input, output) {
     if (is.null(countsPlot))
       return(NULL)
     # max number of cells to plot
-    maxCells <- getMaxCells()
+    maxCells <- getMaxCells() * maxRatioCut# double the ratio to include more cells
     # draw plot
     g <- ggplot(countsPlot, aes(x=sn, y=UMICounts))
     #g <- g + geom_point(shape=21, size=4, alpha=0.6, colour="blue", fill=NA)
