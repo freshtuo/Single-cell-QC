@@ -40,14 +40,26 @@ shinyUI(fluidPage(
       # fraction of accumulative UMI counts plot
       plotOutput("fracPlot"),
       hr(),
-      # download the "fraction counts" plot
+      # download "fraction counts" plot
       downloadButton(outputId="downloadFracPlot", label="Download your plot"),
       hr(),
       # raw UMI counts plot
       plotOutput("rawPlot"),
       hr(),
-      # download the "raw counts" plot
-      downloadButton(outputId="downloadRawPlot", label="Download your plot")
+      # download "raw counts" plot
+      downloadButton(outputId="downloadRawPlot", label="Download your plot"),
+      hr(),
+      # gene violin plot
+      plotOutput("geneViolinPlot"),
+      hr(),
+      # download "gene violin" plot
+      downloadButton(outputId="downloadGeneViolinPlot", label="download your plot"),
+      hr(),
+      # UMI counts violin plot
+      plotOutput("UMIViolinPlot"),
+      hr(),
+      # download "UMI counts violin" plot
+      downloadButton(outputId="downloadUMIViolinPlot", label="download your plot")
     )
   )
 ))

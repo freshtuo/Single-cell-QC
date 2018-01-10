@@ -21,7 +21,7 @@ options(shiny.maxRequestSize=30*1024^2)
 # maxBeads = estCells / capEffCut
 capEffCut <- 0.05
 
-# maximum number of cells to show:
+# maximum number of cells to show in 'fraction' plot
 # maxCells = maxRatioCut * estCells
 maxRatioCut <- 3
 
@@ -47,6 +47,14 @@ shinyServer(function(input, output) {
       return(initEstCells*maxRatioCut)# use default value if estCells is not available
     else
       return(input$estCells*maxRatioCut)# allow 3 times more cells than estimated
+  })
+
+  # get sample id
+  getSampleId <- reactive({
+    if (is.null(input$inputFile))
+      return(NULL)
+    else
+      return(tools::file_path_sans_ext(basename(input$inputFile$name)))
   })
 
   # update cell number slider based on user input
@@ -112,7 +120,7 @@ shinyServer(function(input, output) {
     g <- g + xlab("Cells sorted by UMI counts [descending]") + ylab("Cumulative fraction of UMI counts")
     g <- g + theme(axis.text=element_text(size=16,face="bold"), axis.title=element_text(size=18,face="bold"), title=element_text(size=16,face="bold"))
     # return
-    g
+    return(g)
   })
 
   # render fraction of accumulative UMI counts plot
@@ -129,7 +137,7 @@ shinyServer(function(input, output) {
   output$downloadFracPlot <- downloadHandler(
     filename=function(){
       ####write.table(input$inputFile$name, file="C:\\Users\\taz2008\\Downloads\\file.txt")
-      sampleId <- tools::file_path_sans_ext(basename(input$inputFile$name))
+      sampleId <- getSampleId()
       return(paste(sampleId,"fraction","accumulative","UMI","counts","png",sep="."))
     },
     content=function(file){
@@ -152,8 +160,8 @@ shinyServer(function(input, output) {
     maxCells <- getMaxCells()
     # prepare data.frame for plotting
     sn <- c(1:nrow(counts))
-    countsPlot <- data.frame(sn, counts$GeneUmiCount, counts$CellId)
-    colnames(countsPlot) <- c("sn", "UMICounts", "CellId")
+    countsPlot <- data.frame(sn, counts$DetectedGenes, counts$GeneUmiCount, counts$CellId)
+    colnames(countsPlot) <- c("sn", "Genes", "UMICounts", "CellId")
     countsPlot <- countsPlot[1:maxCells,]
     # return
     return(countsPlot)
@@ -178,7 +186,7 @@ shinyServer(function(input, output) {
     g <- g + xlab("Cells sorted by UMI counts [descending]") + ylab("UMI counts")
     g <- g + theme(axis.text=element_text(size=16,face="bold"), axis.title=element_text(size=18,face="bold"), title=element_text(size=16,face="bold"))
     # return
-    g
+    return(g)
   })
   
   # render raw UMI counts plot
@@ -194,7 +202,7 @@ shinyServer(function(input, output) {
   # download raw UMI counts plot
   output$downloadRawPlot <- downloadHandler(
     filename=function(){
-      sampleId <- tools::file_path_sans_ext(basename(input$inputFile$name))
+      sampleId <- getSampleId()
       return(paste(sampleId,"raw","UMI","counts","png",sep="."))
     },
     content=function(file){
@@ -204,4 +212,89 @@ shinyServer(function(input, output) {
       ggsave(filename=file, plot=g, width=8, height=6, units="in", dpi=300)
     }
   )
+
+  # draw gene violin plot
+  drawGeneViolinPlot <- reactive({
+    # format raw UMI counts
+    countsPlot <- formatUMICounts()
+    if (is.null(countsPlot))
+      return(NULL)
+    # draw plot
+    g <- ggplot(countsPlot[1:input$numCells,], aes(x="", y=Genes))
+    g <- g + geom_violin() + scale_y_continuous(labels=comma)
+    g <- g + geom_boxplot(width=0.15)
+    g <- g + theme_bw()+theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank(), panel.background=element_rect(fill="gray98"))
+    g <- g + theme(legend.position="none", axis.title.x=element_blank())
+    g <- g + ylab("Number of genes") + theme(plot.title=element_text(lineheight=.8, face="bold", vjust=2))
+    g <- g + theme(axis.text=element_text(size=16,face="bold"), axis.title=element_text(size=18,face="bold"), title=element_text(size=16,face="bold"))
+    # return
+    return(g)
+  })
+  
+  # render gene violin plot
+  output$geneViolinPlot <- renderPlot({
+    drawGeneViolinPlot()
+  })
+
+  # disable download buttion if the input UMI counts file is not ready
+  observe({
+    toggleState("downloadGeneViolinPlot", !is.null(input$inputFile))
+  })
+  
+  # download gene violin plot
+  output$downloadGeneViolinPlot <- downloadHandler(
+    filename=function(){
+      sampleId <- getSampleId()
+      return(paste(sampleId,"gene","violin","png",sep="."))
+    },
+    content=function(file){
+      g <- drawGeneViolinPlot()
+      if (is.null(g))
+        return(NULL)
+      ggsave(filename=file, plot=g, width=8, height=6, units="in", dpi=300)
+    }
+  )
+
+  # draw UMI counts violin plot
+  drawUMIViolinPlot <- reactive({
+    # format raw UMI counts
+    countsPlot <- formatUMICounts()
+    if (is.null(countsPlot))
+      return(NULL)
+    # draw plot
+    g <- ggplot(countsPlot[1:input$numCells,], aes(x="", y=UMICounts))
+    g <- g + geom_violin() + scale_y_continuous(labels=comma)
+    g <- g + geom_boxplot(width=0.15)
+    g <- g + theme_bw()+theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank(), panel.background=element_rect(fill="gray98"))
+    g <- g + theme(legend.position="none", axis.title.x=element_blank())
+    g <- g + ylab("Number of UMI counts") + theme(plot.title=element_text(lineheight=.8, face="bold", vjust=2))
+    g <- g + theme(axis.text=element_text(size=16,face="bold"), axis.title=element_text(size=18,face="bold"), title=element_text(size=16,face="bold"))
+    # return
+    return(g)
+  })
+  
+  # render gene violin plot
+  output$UMIViolinPlot <- renderPlot({
+    drawUMIViolinPlot()
+  })
+
+  # disable download buttion if the input UMI counts file is not ready
+  observe({
+    toggleState("downloadUMIViolinPlot", !is.null(input$inputFile))
+  })
+  
+  # download UMI counts violin plot
+  output$downloadUMIViolinPlot <- downloadHandler(
+    filename=function(){
+      sampleId <- getSampleId()
+      return(paste(sampleId,"UMI_counts","violin","png",sep="."))
+    },
+    content=function(file){
+      g <- drawUMIViolinPlot()
+      if (is.null(g))
+        return(NULL)
+      ggsave(filename=file, plot=g, width=8, height=6, units="in", dpi=300)
+    }
+  )
+
 })
