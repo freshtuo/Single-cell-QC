@@ -27,15 +27,29 @@ maxRatioCut <- 3
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
+  # update EstCells (avoid NULL value)
+  getEstCells <- reactive({
+    if (is.null(input$estCells))
+      return(1200)# by default, assume 1200 cells
+    else
+      return(input$estCells*maxRatioCut)# allow 3 times more cells than estimated
+  })
+
+  # update MaxCells (avoid NULL value)
+  getMaxCells <- reactive({
+    if (is.null(input$estCells))
+      return(1200*maxRatioCut)# by default, assume 1200 cells
+    else
+      return(input$estCells)
+  })
+
   # update cell number slider based on user input
   output$cellSlider <- renderUI({
-    if (is.null(input$estCells))
-      return()
     sliderInput(inputId="numCells",
                 label="Number of cells:",
                 min=1,
-                max=input$estCells*maxRatioCut,# allow 3 times more cells than estimated
-                value=input$estCells)
+                max=getMaxCells(),
+                value=getEstCells())
   })
   ##outputOptions(output, "cellSlider", suspendWhenHidden=F)
 
@@ -147,10 +161,11 @@ shinyServer(function(input, output) {
     maxCells <- maxRatioCut*input$estCells
     # draw plot
     g <- ggplot(countsPlot, aes(x=sn, y=UMICounts))
-    g <- g + geom_point(shape=21, size=4, alpha=0.6, colour="blue", fill=NA)
-    g <- g + geom_line(colour="green") + scale_y_log10(labels=comma)
+    #g <- g + geom_point(shape=21, size=4, alpha=0.6, colour="blue", fill=NA)
+    #g <- g + geom_line(colour="green") + scale_y_log10(labels=comma)
+    g <- g + geom_line(size=1) + scale_y_log10(labels=comma) + scale_x_log10(labels=comma)
     g <- g + geom_vline(xintercept=input$numCells, colour="#990000", linetype="dashed")
-    g <- g + coord_cartesian(xlim=c(0,maxCells))
+    g <- g + coord_cartesian(xlim=c(1,maxCells))
     g <- g + theme_bw() + theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank(), panel.background=element_rect(fill="gray98"))
     g <- g + xlab("Cells sorted by UMI counts [descending]") + ylab("UMI counts")
     g <- g + theme(axis.text=element_text(size=16,face="bold"), axis.title=element_text(size=18,face="bold"), title=element_text(size=16,face="bold"))
