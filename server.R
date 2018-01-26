@@ -75,6 +75,38 @@ shinyServer(function(input, output) {
     read.table(inputFile$datapath, header=T, check.names=F, sep=",")
   })
 
+  # summarize number of genes per cell
+  sumNumGenes <- reactive({
+    # load UMI counts
+    counts <- getUMICounts()
+    if (is.null(counts))
+      return(NULL)
+    mysum <- summary(counts$DetectedGenes[1:input$numCells])
+    return(t(data.frame(Gene=unclass(mysum))))
+  })
+
+  # summarize number of UMI counts per cell
+  sumNumUMICounts <- reactive({
+    # load UMI counts
+    counts <- getUMICounts()
+    if (is.null(counts))
+      return(NULL)
+    mysum <- summary(counts$GeneUmiCount[1:input$numCells])
+    return(t(data.frame(UMIs=unclass(mysum))))
+  })
+
+  # render table of gene/UMICounts per cell
+  output$sumTable <- renderTable({
+    # get summary of number of genes per cell
+    gSum <- sumNumGenes()
+    # get summary of number of UMI counts per cell
+    uSum <- sumNumUMICounts()
+    # not available?
+    if (is.null(gSum) | is.null(uSum))
+      return(NULL)
+    return(rbind(gSum, uSum))
+  })
+
   # calculate fraction of accumulative UMI counts for plotting
   getAccumulativeUMIFrac <- reactive({
     # load UMI counts
@@ -126,7 +158,7 @@ shinyServer(function(input, output) {
   # render fraction of accumulative UMI counts plot
   output$fracPlot <- renderPlot({
     drawFracPlot()
-  })
+  }, width=600, height=450)
 
   # disable download buttion if the input UMI counts file is not ready
   observe({
@@ -192,7 +224,7 @@ shinyServer(function(input, output) {
   # render raw UMI counts plot
   output$rawPlot <- renderPlot({
     drawRawPlot()
-  })
+  }, width=600, height=450)
 
   # disable download buttion if the input UMI counts file is not ready
   observe({
@@ -234,7 +266,7 @@ shinyServer(function(input, output) {
   # render gene violin plot
   output$geneViolinPlot <- renderPlot({
     drawGeneViolinPlot()
-  })
+  }, width=600, height=450)
 
   # disable download buttion if the input UMI counts file is not ready
   observe({
@@ -276,7 +308,7 @@ shinyServer(function(input, output) {
   # render gene violin plot
   output$UMIViolinPlot <- renderPlot({
     drawUMIViolinPlot()
-  })
+  }, width=600, height=450)
 
   # disable download buttion if the input UMI counts file is not ready
   observe({
