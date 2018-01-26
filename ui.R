@@ -37,31 +37,34 @@ shinyUI(fluidPage(
     
     # Show a plot of the generated distribution
     mainPanel(
-      # fraction of accumulative UMI counts plot
-      plotOutput(outputId="fracPlot", width="100%"),
-      hr(),
-      hr(),
-      # download "fraction counts" plot
-      downloadButton(outputId="downloadFracPlot", label="Download your plot"),
-      hr(),
-      # raw UMI counts plot
-      plotOutput(outputId="rawPlot", width="100%"),
-      hr(),
-      hr(),
-      # download "raw counts" plot
-      downloadButton(outputId="downloadRawPlot", label="Download your plot"),
-      hr(),
-      # gene violin plot
-      plotOutput(outputId="geneViolinPlot", width="100%"),
-      hr(),
-      # download "gene violin" plot
-      downloadButton(outputId="downloadGeneViolinPlot", label="download your plot"),
-      hr(),
-      # UMI counts violin plot
-      plotOutput(outputId="UMIViolinPlot", width="100%"),
-      hr(),
-      # download "UMI counts violin" plot
-      downloadButton(outputId="downloadUMIViolinPlot", label="download your plot")
+      fluidRow(
+        style="height:480px;",
+        # fraction of accumulative UMI counts plot
+        column(6, plotOutput(outputId="fracPlot", width="100%")),
+        # raw UMI counts plot
+        column(6, plotOutput(outputId="rawPlot", width="100%"))
+      ),
+      fluidRow(
+        style="height:60px;",
+        # download "fraction counts" plot
+        column(5, offset=1, downloadButton(outputId="downloadFracPlot", label="Download your plot")),
+        # download "raw counts" plot
+        column(5, offset=1, downloadButton(outputId="downloadRawPlot", label="Download your plot"))
+      ),
+      fluidRow(
+        style="height:480px;",
+        # gene violin plot
+        column(6, plotOutput(outputId="geneViolinPlot", width="100%")),
+        # UMI counts violin plot
+        column(6, plotOutput(outputId="UMIViolinPlot", width="100%"))
+      ),
+      fluidRow(
+        style="height:60px;",
+        # download "gene violin" plot
+        column(5, offset=1, downloadButton(outputId="downloadGeneViolinPlot", label="download your plot")),
+        # download "UMI counts violin" plot
+        column(5, offset=1, downloadButton(outputId="downloadUMIViolinPlot", label="download your plot"))
+      )
     )
   )
 ))
