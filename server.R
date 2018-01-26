@@ -126,7 +126,7 @@ shinyServer(function(input, output) {
   # render fraction of accumulative UMI counts plot
   output$fracPlot <- renderPlot({
     drawFracPlot()
-  })
+  }, width=600, height=450)
 
   # disable download buttion if the input UMI counts file is not ready
   observe({
@@ -192,7 +192,7 @@ shinyServer(function(input, output) {
   # render raw UMI counts plot
   output$rawPlot <- renderPlot({
     drawRawPlot()
-  })
+  }, width=600, height=450)
 
   # disable download buttion if the input UMI counts file is not ready
   observe({
@@ -234,7 +234,7 @@ shinyServer(function(input, output) {
   # render gene violin plot
   output$geneViolinPlot <- renderPlot({
     drawGeneViolinPlot()
-  })
+  }, width=600, height=450)
 
   # disable download buttion if the input UMI counts file is not ready
   observe({
@@ -276,7 +276,7 @@ shinyServer(function(input, output) {
   # render gene violin plot
   output$UMIViolinPlot <- renderPlot({
     drawUMIViolinPlot()
-  })
+  }, width=600, height=450)
 
   # disable download buttion if the input UMI counts file is not ready
   observe({

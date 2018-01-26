@@ -38,25 +38,27 @@ shinyUI(fluidPage(
     # Show a plot of the generated distribution
     mainPanel(
       # fraction of accumulative UMI counts plot
-      plotOutput("fracPlot"),
+      plotOutput(outputId="fracPlot", width="100%"),
+      hr(),
       hr(),
       # download "fraction counts" plot
       downloadButton(outputId="downloadFracPlot", label="Download your plot"),
       hr(),
       # raw UMI counts plot
-      plotOutput("rawPlot"),
+      plotOutput(outputId="rawPlot", width="100%"),
+      hr(),
       hr(),
       # download "raw counts" plot
       downloadButton(outputId="downloadRawPlot", label="Download your plot"),
       hr(),
       # gene violin plot
-      plotOutput("geneViolinPlot"),
+      plotOutput(outputId="geneViolinPlot", width="100%"),
       hr(),
       # download "gene violin" plot
       downloadButton(outputId="downloadGeneViolinPlot", label="download your plot"),
       hr(),
       # UMI counts violin plot
-      plotOutput("UMIViolinPlot"),
+      plotOutput(outputId="UMIViolinPlot", width="100%"),
       hr(),
       # download "UMI counts violin" plot
       downloadButton(outputId="downloadUMIViolinPlot", label="download your plot")
