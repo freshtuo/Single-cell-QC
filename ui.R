@@ -31,8 +31,11 @@ shinyUI(fluidPage(
                    label="Estimated cell number:",
                    value=initEstCells,
                    min=1),
-      conditionalPanel(condition="output.cellSlider",uiOutput("cellSlider"))
+      conditionalPanel(condition="output.cellSlider",uiOutput("cellSlider")),
       #uiOutput("cellSlider")
+      # summary table on #genes/UMIcounts per cell
+      hr(),
+      tableOutput(outputId="sumTable")
     ),
     
     # Show a plot of the generated distribution

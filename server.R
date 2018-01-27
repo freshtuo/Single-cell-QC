@@ -75,6 +75,38 @@ shinyServer(function(input, output) {
     read.table(inputFile$datapath, header=T, check.names=F, sep=",")
   })
 
+  # summarize number of genes per cell
+  sumNumGenes <- reactive({
+    # load UMI counts
+    counts <- getUMICounts()
+    if (is.null(counts))
+      return(NULL)
+    mysum <- summary(counts$DetectedGenes[1:input$numCells])
+    return(t(data.frame(Gene=unclass(mysum))))
+  })
+
+  # summarize number of UMI counts per cell
+  sumNumUMICounts <- reactive({
+    # load UMI counts
+    counts <- getUMICounts()
+    if (is.null(counts))
+      return(NULL)
+    mysum <- summary(counts$GeneUmiCount[1:input$numCells])
+    return(t(data.frame(UMIs=unclass(mysum))))
+  })
+
+  # render table of gene/UMICounts per cell
+  output$sumTable <- renderTable({
+    # get summary of number of genes per cell
+    gSum <- sumNumGenes()
+    # get summary of number of UMI counts per cell
+    uSum <- sumNumUMICounts()
+    # not available?
+    if (is.null(gSum) | is.null(uSum))
+      return(NULL)
+    return(rbind(gSum, uSum))
+  })
+
   # calculate fraction of accumulative UMI counts for plotting
   getAccumulativeUMIFrac <- reactive({
     # load UMI counts
