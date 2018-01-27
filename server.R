@@ -105,7 +105,7 @@ shinyServer(function(input, output) {
     if (is.null(gSum) | is.null(uSum))
       return(NULL)
     return(rbind(gSum, uSum))
-  })
+  }, rownames=TRUE)
 
   # calculate fraction of accumulative UMI counts for plotting
   getAccumulativeUMIFrac <- reactive({
